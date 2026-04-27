@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Helping Hands — Design 1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:   #0a0f0f;
+      --white:   #eef6f6;
+      --teal:    #2ab8a0;
+      --teal2:   #1e9080;
+      --orange:  #f5931e;
+      --orange2: #d97a10;
+      --gray:    #111c1c;
+      --gray2:   #1e2e2e;
+      --muted:   #7a9a98;
+      --border:  rgba(42,184,160,0.15);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--black);
+      color: var(--white);
+      overflow-x: hidden;
+      cursor: none;
+    }
+    #cursor {
+      width: 12px; height: 12px;
+      background: var(--teal);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transition: transform .08s linear;
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--teal);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transition: transform .18s ease, width .2s, height .2s, opacity .2s;
+      opacity: .5;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem; letter-spacing: .1em;
+    }
+    .nav-logo span { color: var(--teal); }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem; letter-spacing: .08em;
+      padding: .45rem 1rem;
+      border: 1px solid var(--teal); border-radius: 100px;
+      color: var(--teal); text-transform: uppercase;
+    }
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 3rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-bg-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(120px, 22vw, 300px);
+      color: rgba(255,255,255,0.03);
+      white-space: nowrap;
+      pointer-events: none; user-select: none;
+    }
+    .hero-grid-overlay {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(42,184,160,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,184,160,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: flex; align-items: center; gap: 1rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .75rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--teal); margin-bottom: 1.5rem;
+      opacity: 0; animation: slideUp .6s .1s ease forwards;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: inline-block;
+      width: 32px; height: 1px; background: var(--teal);
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 12vw, 13rem);
+      line-height: .92; letter-spacing: -.01em;
+      opacity: 0; animation: slideUp .7s .2s ease forwards;
+    }
+    .hero-title .outline { -webkit-text-stroke: 2px var(--white); color: transparent; }
+    .hero-title .accent { color: var(--orange); }
+    .hero-bottom {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-top: 3rem; gap: 2rem;
+      opacity: 0; animation: slideUp .7s .4s ease forwards;
+    }
+    .hero-desc { max-width: 380px; font-size: .95rem; line-height: 1.75; color: var(--muted); }
+    .hero-desc strong { color: var(--white); font-weight: 700; }
+    .hero-actions { display: flex; gap: 1rem; align-items: center; }
+    .btn-solid {
+      background: var(--orange); color: var(--black);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+      padding: .9rem 2rem; border-radius: 4px; text-decoration: none;
+      font-weight: 500; transition: background .2s, transform .15s; display: inline-block;
+    }
+    .btn-solid:hover { background: var(--orange2); transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+      padding: .9rem 2rem; border: 1px solid var(--border); border-radius: 4px;
+      text-decoration: none; color: var(--white);
+      transition: border-color .2s, transform .15s; display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--white); transform: translateY(-2px); }
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; right: 3rem;
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    }
+    .hero-scroll span {
+      font-family: 'IBM Plex Mono', monospace; font-size: .62rem;
+      letter-spacing: .15em; text-transform: uppercase; color: var(--muted);
+      writing-mode: vertical-rl;
+    }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--teal), transparent);
+      animation: scrollPulse 2s infinite;
+    }
+    @keyframes scrollPulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+    section:not(#hero) { padding: 7rem 3rem; }
+    .label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--teal); display: flex; align-items: center; gap: .8rem;
+      margin-bottom: 1.2rem;
+    }
+    .label::after { content: ''; flex:1; max-width:48px; height:1px; background:var(--teal); }
+    .big-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 5.5rem);
+      line-height: .95; letter-spacing: .01em;
+    }
+    #problem { background: var(--black); border-top: 1px solid var(--border); }
+    .problem-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; margin-top: 3.5rem; align-items: start;
+    }
+    .problem-statement {
+      border-left: 3px solid var(--teal);
+      padding: 2rem 2.5rem; background: var(--gray);
+      border-radius: 0 8px 8px 0; margin-bottom: 2.5rem;
+    }
+    .problem-statement p {
+      font-size: 1.1rem; line-height: 1.7; color: var(--white); font-weight: 700;
+    }
+    .problem-body { font-size: .95rem; line-height: 1.8; color: var(--muted); }
+    .problem-body p + p { margin-top: 1rem; }
+    .problem-body strong { color: var(--white); font-weight: 700; }
+    .stats-col { display: flex; flex-direction: column; gap: 1px; }
+    .stat-row {
+      padding: 2rem 2.5rem; background: var(--gray);
+      display: flex; align-items: center; gap: 2rem;
+      transition: background .2s; position: relative; overflow: hidden;
+    }
+    .stat-row::before {
+      content: ''; position: absolute; left:0; top:0; bottom:0;
+      width: 3px; background: var(--teal);
+      transform: scaleY(0); transition: transform .3s; transform-origin: bottom;
+    }
+    .stat-row:hover { background: var(--gray2); }
+    .stat-row:hover::before { transform: scaleY(1); }
+    .stat-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem; color: var(--teal); line-height: 1; min-width: 120px;
+    }
+    .stat-text { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+    .stat-text strong { color: var(--white); display: block; font-size: .95rem; margin-bottom: .2rem; }
+    #solution { background: var(--white); color: var(--black); }
+    #solution .label { color: #1a7a6e; }
+    #solution .label::after { background: #1a7a6e; }
+    #solution .big-heading { color: var(--black); }
+    #solution .sol-card::after { background: var(--black); }
+    #solution .sol-icon-wrap { background: var(--black); }
+    #solution .sol-card:hover .sol-icon-wrap { background: var(--orange); }
+    .solution-intro {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 3.5rem; gap: 3rem;
+    }
+    .solution-sub { max-width: 380px; font-size: .92rem; line-height: 1.75; color: #555; align-self: flex-end; }
+    .sol-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1px; background: #ddd; border: 1px solid #ddd;
+    }
+    .sol-card {
+      background: var(--white); padding: 2.5rem 2rem;
+      transition: background .2s; position: relative; overflow: hidden;
+    }
+    .sol-card::after {
+      content: ''; position: absolute; bottom:0; left:0; right:0;
+      height: 3px; background: var(--black);
+      transform: scaleX(0); transition: transform .3s; transform-origin: left;
+    }
+    .sol-card:hover { background: #f5f5f0; }
+    .sol-card:hover::after { transform: scaleX(1); }
+    .sol-num { font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.1em; color:#aaa; margin-bottom:1.5rem; }
+    .sol-icon-wrap { width:48px; height:48px; background:var(--black); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1.5rem; transition:background .2s; }
+    .sol-card h3 {
+      font-family:'Syne',sans-serif; font-size:1rem; font-weight:800;
+      margin-bottom:.6rem; color:var(--black); text-transform:uppercase; letter-spacing:.04em;
+    }
+    .sol-card p { font-size:.85rem; color:#666; line-height:1.7; }
+    #prototype { background: var(--black); border-top: 1px solid var(--border); }
+    .proto-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2.5rem; }
+    .proto-sub { max-width:300px; font-size:.85rem; color:var(--muted); line-height:1.7; text-align:right; }
+    .gallery {
+      display: grid; grid-template-columns: repeat(12,1fr);
+      grid-template-rows: auto auto; gap: 8px;
+    }
+    .g-item {
+      border-radius: 6px; overflow: hidden;
+      position: relative; background: var(--gray); cursor: pointer;
+    }
+    .g-item:nth-child(1) { grid-column: span 7; aspect-ratio: 16/9; }
+    .g-item:nth-child(2) { grid-column: span 5; aspect-ratio: 16/9; }
+    .g-item:nth-child(3) { grid-column: span 4; aspect-ratio: 4/3; }
+    .g-item:nth-child(4) { grid-column: span 4; aspect-ratio: 4/3; }
+    .g-item:nth-child(5) { grid-column: span 4; aspect-ratio: 4/3; }
+    .g-ph {
+      width:100%; height:100%;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:.6rem; color:#444; transition:color .3s;
+    }
+    .g-item:hover .g-ph { color:#777; }
+    .g-ph-icon { font-size:2rem; }
+    .g-ph-label { font-family:'IBM Plex Mono',monospace; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; }
+    .g-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top,rgba(200,241,53,.9),transparent 60%);
+      display:flex; align-items:flex-end; padding:1.2rem;
+      opacity:0; transition:opacity .3s;
+    }
+    .g-item:hover .g-overlay { opacity:1; }
+    .g-overlay-text { font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--black); font-weight:500; }
+    .proto-tip { margin-top:1.5rem; font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.06em; color:#444; }
+    .proto-tip span { color:var(--teal); }
+    #team { background: var(--gray); border-top: 1px solid var(--border); }
+    .team-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:3rem; }
+    .team-count { font-family:'Bebas Neue',sans-serif; font-size:5rem; color:rgba(255,255,255,.06); line-height:1; }
+    .team-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap:1px; background:var(--border); border:1px solid var(--border);
+    }
+    .team-card {
+      background:var(--gray); padding:2.5rem 2rem;
+      transition:background .2s; position:relative;
+    }
+    .team-card:hover { background:var(--gray2); }
+    .team-card::before {
+      content:''; position:absolute; top:0; left:0; right:0;
+      height:2px; background:var(--teal);
+      transform:scaleX(0); transition:transform .3s; transform-origin:left;
+    }
+    .team-card:hover::before { transform:scaleX(1); }
+    .team-num { font-family:'IBM Plex Mono',monospace; font-size:.65rem; color:#444; letter-spacing:.1em; margin-bottom:1.5rem; }
+    .avatar {
+      width:64px; height:64px; border-radius:50%;
+      background:linear-gradient(135deg,#333,#555);
+      border:2px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--teal);
+      margin-bottom:1.2rem; transition:border-color .2s;
+    }
+    .team-card:hover .avatar { border-color:var(--teal); }
+    .team-card h3 { font-size:.95rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.3rem; }
+    .team-card p { font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); letter-spacing:.05em; }
+    footer {
+      background:var(--black); border-top:1px solid var(--border);
+      padding:3rem; display:flex; justify-content:space-between; align-items:center;
+    }
+    .foot-logo { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.06em; }
+    .foot-logo span { color:var(--teal); }
+    .foot-right { text-align:right; font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.08em; color:#444; line-height:1.8; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:none} }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    @media(max-width:900px){
+      nav{padding:1.1rem 1.5rem;}
+      .nav-links{display:none;}
+      section:not(#hero){padding:4.5rem 1.5rem;}
+      #hero{padding:0 1.5rem 3rem;}
+      .hero-bg-text{display:none;}
+      .problem-layout{grid-template-columns:1fr;gap:2.5rem;}
+      .sol-grid{grid-template-columns:1fr 1fr;}
+      .team-grid{grid-template-columns:repeat(2,1fr);}
+      .gallery{grid-template-columns:1fr 1fr;}
+      .g-item:nth-child(1){grid-column:span 2;}
+      .g-item:nth-child(2){grid-column:span 2;}
+      .g-item:nth-child(3),.g-item:nth-child(4),.g-item:nth-child(5){grid-column:span 1;}
+      .solution-intro{flex-direction:column;gap:1rem;}
+      footer{flex-direction:column;gap:1.5rem;text-align:center;}
+      .foot-right{text-align:center;}
+    }
+  </style>
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <nav>
+    <div class="nav-logo">
+      <img src="Logo.png" alt="Helping Hands Logo" style="height:104px;width:auto;display:block;">
+    </div>
+    <div class="nav-links">
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#prototype">Prototype</a>
+      <a href="#team">Team</a>
+      <span class="nav-pill">Design 1</span>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-bg-text"></div>
+    <h1 class="hero-title">
+      Helping<br>
+      <span class="outline">Every</span><br>
+      <span class="accent">Hand.</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        Reimagining <strong>handled tools</strong> for people with reduced hand motor function.
+      </p>
+      <div class="hero-actions">
+        <a href="#solution" class="btn-solid">View Solution</a>
+        <a href="#problem" class="btn-ghost">The Problem</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <section id="problem">
+    <div class="label reveal">01 — Problem</div>
+    <h2 class="big-heading reveal">The Gap<br>in Design</h2>
+    <div class="problem-layout">
+      <div>
+        <div class="problem-statement reveal">
+          <p>"How can we make a variety of handled tools more accessible to people of reduced hand motor functions?"</p>
+        </div>
+        <div class="problem-body reveal">
+          <p>Millions of people live with <strong>arthritis, Parkinson's disease, stroke-related weakness, and cerebral palsy</strong> — all conditions that significantly impact grip strength and dexterity.</p>
+          <p>Everyday tools are engineered around a single idealized hand grip. For those who cannot achieve that grip, the result is exclusion from activities most people take for granted.</p>
+          <p>This isn't a niche problem. It's a <strong>design failure at scale</strong> — and it demands a better answer.</p>
+        </div>
+      </div>
+      <div class="stats-col reveal">
+        <div class="stat-row">
+  <div class="stat-big">54M+</div>
+  <div class="stat-text">
+    <strong>Americans with Arthritis</strong>
+    The most common cause of reduced hand motor function in the U.S.
+    <a href="https://www.cdc.gov/cdi/indicator-definitions/arthritis.html"
+       target="_blank"
+       style="display:inline-block;margin-top:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.06em;color:var(--teal);text-decoration:none;border-bottom:1px solid var(--teal);">
+      [1] CDC — Arthritis Indicator Definitions
+    </a>
+  </div>
+</div>
+<div class="stat-row">
+  <div class="stat-big">1 in 6</div>
+  <div class="stat-text">
+    <strong>People Globally</strong>
+    Live with a disability affecting mobility in some form.
+    <a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health"
+       target="_blank"
+       style="display:inline-block;margin-top:.5rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.06em;color:var(--teal);text-decoration:none;border-bottom:1px solid var(--teal);">
+      [2] WHO — Disability and Health Fact Sheet
+    </a>
+  </div>
+</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="solution">
+  <div class="solution-intro">
+    <div>
+      <div class="label reveal">02 — Solution</div>
+      <h2 class="big-heading reveal">Five Systems,<br>One Device</h2>
+    </div>
+    <p class="solution-sub reveal">A modular, wearable gripping aid built from five integrated subsystems — each validated through prototyping, testing, and real stakeholder feedback.</p>
+  </div>
+
+  <div class="sol-grid reveal">
+    <div class="sol-card">
+      <div class="sol-num">01</div>
+      <div class="sol-icon-wrap">🧤</div>
+      <h3>Compression Brace</h3>
+      <p>An off-the-shelf compression wrist sleeve forms the foundation of the device. It fits securely without Velcro, supports impaired joints, and is fully washable — with sewn magnet pockets built into the palm.</p>
+    </div>
+    <div class="sol-card">
+      <div class="sol-num">02</div>
+      <div class="sol-icon-wrap">🔵</div>
+      <h3>Brace Magnet Array</h3>
+      <p>Neodymium disc magnets are housed in sewn pockets on the palm of the brace. With each magnet rated at 5.5 lbs. of holding force, a three-magnet arrangement exceeds the 15 lb. load target while still releasing cleanly with a simple twist.</p>
+    </div>
+    <div class="sol-card">
+      <div class="sol-num">03</div>
+      <div class="sol-icon-wrap">🔲</div>
+      <h3>Handle Magnet Mount</h3>
+      <p>A bar magnet is embedded into the 3D printed tool attachment using glue. It sits just above flush with the surface to snap securely to the brace magnets while remaining fully enclosed and protected.</p>
+    </div>
+    <div class="sol-card">
+      <div class="sol-num">04</div>
+      <div class="sol-icon-wrap">🔧</div>
+      <h3>Universal Tool Strap</h3>
+      <p>A TPU-printed flexible plate with looping straps wraps around the handle of virtually any tool. The strap friction system holds up to 18 lbs. across handles from 0.5 to 2 inches in diameter, with no tools needed to attach or remove.</p>
+    </div>
+    <div class="sol-card">
+      <div class="sol-num">05</div>
+      <div class="sol-icon-wrap">🫧</div>
+      <h3>Adaptive Core Grip</h3>
+      <p>A TPU cone printed with low-density gyroid infill mimics the behavior of foam — deforming to accept handles of varying shapes and snapping back to grip them securely. Works in tandem with the universal strap and fits a wide range of everyday tools.</p>
+    </div>
+    <div class="sol-card">
+      <div class="sol-num">✦</div>
+      <div class="sol-icon-wrap">⚡</div>
+      <h3>Twist-to-Release</h3>
+      <p>Stakeholder testing confirmed that rotating the handle relative to the brace drastically reduces the force needed to separate the two — giving users with limited grip strength an intuitive, low-effort way to attach and detach tools independently.</p>
+    </div>
+  </div>
+</section>
+
+  <section id="prototype">
+    <div class="proto-header">
+      <div>
+        <div class="label reveal">03 — Prototype Gallery</div>
+        <h2 class="big-heading reveal">From Idea<br>to Object</h2>
+      </div>
+      <p class="proto-sub reveal">Sketches, models, and user testing sessions that shaped the final design.</p>
+    </div>
+    <div class="gallery reveal">
+      <div class="g-item">
+        <div class="g-ph"><div class="g-ph-icon">📸</div><div class="g-ph-label">Hero Prototype Photo</div></div>
+        <div class="g-overlay"><span class="g-overlay-text">Final Prototype — Front View</span></div>
+      </div>
+      <div class="g-item">
+        <div class="g-ph"><div class="g-ph-icon">✏️</div><div class="g-ph-label">Ideation Sketches</div></div>
+        <div class="g-overlay"><span class="g-overlay-text">Early Concept Sketches</span></div>
+      </div>
+      <div class="g-item">
+        <img src="universal.jpg" alt="Technical Drawing" style="width:100%;height:100%;object-fit:cover;">
+        <div class="g-overlay"><span class="g-overlay-text">CAD / Technical Drawings</span></div>
+        </div>
+      <div class="g-item">
+        <div class="g-ph"><div class="g-ph-icon">🛠️</div><div class="g-ph-label">Build Process</div></div>
+        <div class="g-overlay"><span class="g-overlay-text">Fabrication Process</span></div>
+      </div>
+      <div class="g-item">
+        <div class="g-ph"><div class="g-ph-icon">🧑‍🤝‍🧑</div><div class="g-ph-label">User Testing</div></div>
+        <div class="g-overlay"><span class="g-overlay-text">User Testing Sessions</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="team">
+    <div class="team-header">
+      <div>
+        <div class="label reveal">04 — The Team</div>
+        <h2 class="big-heading reveal">The People<br>Behind It</h2>
+      </div>
+      <div class="team-count reveal">Helping Hands</div>
+    </div>
+    <div class="team-grid reveal" style="grid-template-columns: repeat(5, 1fr);">
+      <div class="team-card">
+        <div class="team-num">Member — 01</div>
+        <img src="blake.jpg" alt="Blake Lawson" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1.2rem;">        <h3>Blake Lawson</h3>
+        <p>Brace Magnet Attachment</p>
+      </div>
+      <div class="team-card">
+        <div class="team-num">Member — 02</div>
+        <img src="carsten.jpg" alt="Carsten Kirkland" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1.2rem;">
+        <h3>Carsten Kirkland</h3>
+        <p>Handle Magnet Mount</p>
+      </div>
+      <div class="team-card">
+        <div class="team-num">Member — 03</div>
+        <img src="harry.jpg" alt="Harry Birch Wright" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1.2rem;">
+        <h3>Harry Birch Wright</h3>
+        <p>Adaptive Core Grip</p>
+      </div>
+      <div class="team-card">
+        <div class="team-num">Member — 04</div>
+        <img src="magnus.jpg" alt="Magnus Van Zyl" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1.2rem;">
+        <h3>Magnus Van Zyl</h3>
+        <p>Brace Design</p>
+      </div>
+      <div class="team-card">
+        <div class="team-num">Member — 05</div>
+        <img src="wesley.jpg" alt="Wesley Drake" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:1.2rem;">
+        <h3>Wesley Drake</h3>
+        <p>Universal Tool Strap</p>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-logo">
+      <img src="Logo.png" alt="Helping Hands Logo" style="height:96px;width:auto;display:block;filter:brightness(1.1);">
+    </div>
+    <div class="foot-right">
+      Design 1 — Accessibility Project<br>
+      Harry Birch Wright | Created with help from GenAI
+    </div>
+  </footer>
+
+  <script>
+    const cur = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cur.style.transform = `translate(${e.clientX - 6}px, ${e.clientY - 6}px)`;
+      ring.style.transform = `translate(${e.clientX - 18}px, ${e.clientY - 18}px)`;
+    });
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
